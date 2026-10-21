@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheer & Dance Formation Studio</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fdf2f8',
+              100: '#fce7f3',
+              500: '#ec4899',
+              600: '#db2777',
+              700: '#be185d',
+            },
+            mat: '#0f172a',
+            matPanel: '#1e293b'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom subtle scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.5);
+    }
+
+    /* Floor Grid styling */
+    .mat-stripes {
+      background-size: 80px 80px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    }
+
+    /* Dancer Token Styles */
+    .dancer-token {
+      touch-action: none;
+      user-select: none;
+      transition: transform 0.08s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+      cursor: grab;
+    }
+    .dancer-token:active {
+      cursor: grabbing;
+    }
+    .dancer-token.dragging {
+      z-index: 50 !important;
+      transform: scale(1.15) !important;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.35), 0 10px 10px rgba(0,0,0,0.22) !important;
+    }
+    .dancer-token.selected {
+      outline: 3px solid #38bdf8;
+      outline-offset: 3px;
+    }
+
+    /* Print styling: Professional Coaches Drill Sheet */
+    @media print {
+      @page {
+        size: landscape;
+        margin: 10mm 12mm 10mm 12mm;
+      }
+      *, *::before, *::after {
+        box-sizing: border-box !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print, header, aside, #modal-container, #print-preview-modal {
+        display: none !important;
+      }
+      main {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+      }
+      #print-sheet-header {
+        display: block !important;
+        margin-bottom: 8px !important;
+        border-bottom: 2px solid #0f172a !important;
+        padding-bottom: 6px !important;
+      }
+      #mat-wrapper {
+        padding: 0 !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background: transparent !important;
+      }
+      #mat-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 480px !important;
+        min-height: 480px !important;
+        aspect-ratio: auto !important;
+        background: #ffffff !important;
+        border: 2.5px solid #0f172a !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+        position: relative !important;
+        page-break-inside: avoid !important;
+      }
+      .mat-stripes {
+        background-size: 40px 40px !important;
+        background-image: 
+          linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px) !important;
+      }
+      /* Floor line dividers on white floor */
+      .cheer-strip-divider {
+        border-color: rgba(15, 23, 42, 0.25) !important;
+      }
+      .center-line-v {
+        background-color: #e11d48 !important;
+        width: 2px !important;
+      }
+      .center-line-h {
+        background-color: #2563eb !important;
+        height: 1.5px !important;
+      }
+      .center-target {
+        border-color: #0f172a !important;
+      }
+      .center-target div {
+        background-color: #0f172a !important;
+      }
+      /* Clean print tokens with high-contrast borders and readable labels */
+      .dancer-token {
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)) !important;
+      }
+      .dancer-token .token-circle {
+        border: 2px solid #0f172a !important;
+        box-shadow: none !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+      }
+      .dancer-token .token-label {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 1.5px solid #0f172a !important;
+        font-weight: 700 !important;
+        font-size: 10px !important;
+        padding: 1px 4px !important;
+        box-shadow: none !important;
+      }
+      /* Front indicator bar in print */
+      #front-stage-banner {
+        background: #f1f5f9 !important;
+        border-top: 2px solid #0f172a !important;
+        color: #0f172a !important;
+      }
+      #front-stage-banner span {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+      }
+      /* Print notes and roster ledger */
+      #print-roster-ledger {
+        display: block !important;
+        margin-top: 10px !important;
+        page-break-inside: avoid !important;
+      }
+      #court-numbers {
+        color: #334155 !important;
+        font-weight: 700 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased overflow-x-hidden select-none">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40 no-print">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 via-rose-500 to-purple-600 flex items-center justify-center shadow-lg shadow-pink-500/20 text-white font-black text-xl">
+        <i class="ph-bold ph-users-three"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <input id="formation-name" type="text" value="Dance Formation 1" class="bg-transparent font-bold text-lg text-slate-100 hover:bg-slate-800/60 focus:bg-slate-800 px-2 py-0.5 rounded-lg border border-transparent focus:border-slate-600 outline-none transition w-48 sm:w-64" />
+          <span class="text-xs px-2 py-0.5 bg-pink-500/10 text-pink-400 font-medium rounded-full border border-pink-500/20">Handwritten Import</span>
+        </div>
+        <p class="text-xs text-slate-400 px-2">Front is Down (Audience/Judges)</p>
+      </div>
+    </div>
+
+    <!-- Quick action toolbars -->
+    <div class="flex items-center flex-wrap gap-2">
+      <button id="btn-toggle-grid" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+        <i class="ph ph-grid-four text-base text-pink-400"></i>
+        <span>Grid: <strong id="grid-status" class="text-emerald-400">On</strong></span>
+      </button>
+
+      <button id="btn-toggle-snap" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+        <i class="ph ph-magnet text-base text-amber-400"></i>
+        <span>Snap: <strong id="snap-status" class="text-emerald-400">On</strong></span>
+      </button>
+
+      <button id="btn-toggle-numbers" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+        <i class="ph ph-number-circle-five text-base text-cyan-400"></i>
+        <span class="hidden sm:inline">Court Marks: </span><strong id="marks-status" class="text-emerald-400">On</strong>
+      </button>
+
+      <div class="h-6 w-px bg-slate-700 mx-1"></div>
+
+      <button id="btn-reset" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-rose-950/60 text-slate-200 hover:text-rose-300 border border-slate-700 transition" title="Restore original handwriting positions">
+        <i class="ph ph-arrow-counter-clockwise text-base"></i>
+        <span class="hidden md:inline">Reset Original</span>
+      </button>
+
+      <button id="btn-preview-print" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" title="View print drill sheet layout">
+        <i class="ph ph-eye text-base text-pink-400"></i>
+        <span class="hidden sm:inline">Print Preview</span>
+      </button>
+
+      <button id="btn-print" class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-pink-600 hover:bg-pink-500 text-white shadow-md shadow-pink-600/30 transition">
+        <i class="ph-bold ph-printer text-base"></i>
+        <span>Print / Save PDF</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Dedicated Print Header (Hidden on screen, visible during Print) -->
+  <div id="print-sheet-header" class="hidden no-screen px-4 pt-2">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 id="print-title-display" class="text-xl font-black uppercase tracking-wide text-slate-900">Dance Formation 1</h1>
+        <p class="text-xs text-slate-600 font-medium">Competition Cheer & Dance Floor Chart • St. Nicholas Cheer Team</p>
+      </div>
+      <div class="text-right text-xs text-slate-600">
+        <div><strong>Date:</strong> <span id="print-date"></span></div>
+        <div><strong>Dancers on Floor:</strong> <span id="print-dancer-count">16</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace Area -->
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+
+    <!-- Left Controls / Roster Panel -->
+    <aside class="w-full lg:w-72 bg-slate-900/90 backdrop-blur border-r border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto max-h-60 lg:max-h-none no-print order-2 lg:order-1">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i class="ph-bold ph-users text-pink-400"></i> Dancers Roster (<span id="roster-count">14</span>)
+          </h2>
+          <button id="btn-add-dancer" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 text-pink-400 font-semibold rounded border border-slate-700 flex items-center gap-1 transition">
+            <i class="ph-bold ph-plus"></i> Add
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-2 leading-relaxed">
+          Extracted directly from your sheet. Click to highlight or drag tokens directly on the mat.
+        </p>
+      </div>
+
+      <!-- Dancer List -->
+      <div id="roster-list" class="space-y-1.5 flex-1 pr-1 overflow-y-auto">
+        <!-- Dynamically rendered roster items -->
+      </div>
+
+      <!-- Formation Tools & Auto-Clean Helpers -->
+      <div class="pt-3 border-t border-slate-800 space-y-2">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Instant Alignment Presets</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btn-clean-chevrons" class="px-2.5 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700/80 font-medium flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-caret-up text-pink-400 text-sm"></i> Clean Wedge
+          </button>
+          <button id="btn-clean-box" class="px-2.5 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700/80 font-medium flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-square text-cyan-400 text-sm"></i> Clean Box
+          </button>
+          <button id="btn-clean-wings" class="px-2.5 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700/80 font-medium flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-arrows-out-line-horizontal text-emerald-400 text-sm"></i> Clean Wings
+          </button>
+          <button id="btn-symmetrize" class="px-2.5 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700/80 font-medium flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-split-vertical text-amber-400 text-sm"></i> Mirror Symmetry
+          </button>
+        </div>
+      </div>
+
+      <!-- Formation Note from handwritten paper -->
+      <div class="bg-gradient-to-br from-pink-950/30 to-purple-950/20 border border-pink-500/20 rounded-xl p-3 text-xs">
+        <div class="flex items-center gap-1.5 font-bold text-pink-300 mb-1">
+          <i class="ph-fill ph-note-pencil"></i> Note from Sheet:
+        </div>
+        <p id="routine-note-text" class="text-slate-300 italic">"4 back move forward"</p>
+        <div class="mt-2 flex items-center gap-2">
+          <button id="btn-apply-4back" class="w-full py-1.5 px-2 bg-pink-600/30 hover:bg-pink-600/50 text-pink-200 border border-pink-500/40 rounded-lg font-semibold text-[11px] flex items-center justify-center gap-1 transition">
+            <i class="ph-bold ph-arrow-down"></i> Shift Back 4 Forward
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Floor Section -->
+    <div id="mat-wrapper" class="flex-1 flex flex-col p-3 sm:p-6 items-center justify-center overflow-auto bg-slate-950 relative order-1 lg:order-2">
+      
+      <!-- Backstage Label -->
+      <div class="w-full max-w-4xl flex items-center justify-between text-xs text-slate-400 font-semibold px-4 mb-2 print:text-slate-800">
+        <span class="flex items-center gap-1"><i class="ph ph-arrow-up"></i> BACKSTAGE (Upstage)</span>
+        <span class="text-slate-400 print:text-slate-600 text-[11px] font-mono">Floor Center [0, 0]</span>
+        <span class="flex items-center gap-1"><i class="ph ph-arrow-up"></i> UPSTAGE</span>
+      </div>
+
+      <!-- The Mat Floor Container -->
+      <div id="mat-container" class="relative w-full max-w-4xl aspect-[4/3] min-h-[460px] sm:min-h-[520px] bg-slate-900 border-4 border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden mat-stripes flex flex-col justify-between select-none">
+        
+        <!-- Floor Overlay Markings (Cheer strip lines, center cross, court numbers) -->
+        <div id="mat-grid-lines" class="absolute inset-0 pointer-events-none">
+          <!-- 7 Cheer Mat Panels (Standard competition mat division) -->
+          <div class="absolute inset-0 grid grid-cols-7 divide-x divide-slate-800/70 cheer-strip-divider">
+            <div class="h-full"></div>
+            <div class="h-full"></div>
+            <div class="h-full"></div>
+            <div class="h-full"></div>
+            <div class="h-full"></div>
+            <div class="h-full"></div>
+            <div class="h-full"></div>
+          </div>
+
+          <!-- Vertical Center Line -->
+          <div class="center-line-v absolute top-0 bottom-0 left-1/2 w-0.5 -translate-x-1/2 bg-rose-500/40 z-0"></div>
+          <!-- Horizontal Center Line -->
+          <div class="center-line-h absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-blue-500/30 z-0"></div>
+
+          <!-- Center Crosshairs Target -->
+          <div class="center-target absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-pink-500/30 flex items-center justify-center">
+            <div class="w-2 h-2 rounded-full bg-pink-500/60"></div>
+          </div>
+
+          <!-- Court Hash / Distance Grid Numbers -->
+          <div id="court-numbers" class="absolute inset-x-0 bottom-3 flex justify-between px-6 text-[10px] font-mono text-slate-400 font-bold uppercase tracking-widest">
+            <span>Stage Left</span>
+            <div class="space-x-8 text-slate-400 print:text-slate-700">
+              <span>-3</span>
+              <span>-2</span>
+              <span>-1</span>
+              <span class="text-pink-400 print:text-slate-900 font-black">CENTER</span>
+              <span>+1</span>
+              <span>+2</span>
+              <span>+3</span>
+            </div>
+            <span>Stage Right</span>
+          </div>
+
+          <!-- Alignment Helper Lines (Wedge visual preview) -->
+          <svg id="guide-layer" class="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+            <!-- Dynamic lines rendered in JS -->
+          </svg>
+        </div>
+
+        <!-- Dancer Tokens Layer -->
+        <div id="dancer-layer" class="absolute inset-0 z-10">
+          <!-- Dancer elements placed dynamically -->
+        </div>
+
+        <!-- Front of Stage Indicator (Downstage / Judges) -->
+        <div id="front-stage-banner" class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-pink-600/20 via-pink-600/5 to-transparent h-12 pointer-events-none flex items-end justify-center pb-2 z-0">
+          <span class="text-xs font-black tracking-widest text-pink-400 flex items-center gap-2 uppercase">
+            <i class="ph-bold ph-caret-down"></i> FRONT / AUDIENCE & JUDGES <i class="ph-bold ph-caret-down"></i>
+          </span>
+        </div>
+      </div>
+
+      <!-- Print-Only Details Ledger (Table of exact stage coordinates & cues) -->
+      <div id="print-roster-ledger" class="hidden no-screen w-full mt-3 border-t-2 border-slate-900 pt-2 text-[11px] text-slate-800">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <span class="font-bold uppercase tracking-wider text-slate-900 block mb-1">Dancers & Coordinates (Left % , Depth %)</span>
+            <div id="print-roster-grid" class="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] font-mono">
+              <!-- Dynamically populated roster list -->
+            </div>
+          </div>
+          <div class="border-l border-slate-300 pl-4 space-y-1.5">
+            <span class="font-bold uppercase tracking-wider text-slate-900 block mb-1">Choreography & Transition Notes</span>
+            <div class="p-2 bg-slate-100 rounded border border-slate-300 text-[10px] space-y-1">
+              <div><strong>Primary Cue:</strong> 4 Back Dancers (Hannah, Rome, Carter, Alaina) move forward on 8-count count 5.</div>
+              <div><strong>Front Point:</strong> Alexa holds center point (50%, 64%).</div>
+              <div><strong>Spacings:</strong> Check interval distance between wings and center box.</div>
+            </div>
+            <div class="text-[9px] text-slate-500 mt-1">Generated by Cheer & Dance Formation Studio.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick helper controls under mat -->
+      <div class="w-full max-w-4xl mt-3 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2 no-print">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Front Wedge (5)
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 ml-2"></span> Back Box (4)
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 ml-2"></span> Wings & Center
+        </div>
+        <div class="text-[11px] text-slate-400">
+          Tip: Click <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">Print Preview</kbd> to check paper formatting before printing.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Selected Dancer Inspector & Mat Settings -->
+    <aside class="w-full lg:w-72 bg-slate-900/90 backdrop-blur border-l border-slate-800 p-4 flex flex-col gap-4 no-print order-3">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <i class="ph-bold ph-sliders-horizontal text-pink-400"></i> Inspector
+        </h3>
+        <span id="selected-badge" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">None selected</span>
+      </div>
+
+      <!-- Selected Dancer Details -->
+      <div id="inspector-content" class="space-y-4">
+        <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-800 text-center text-xs text-slate-400">
+          Click or tap any dancer on the mat to edit position, name, or role color.
+        </div>
+      </div>
+
+      <!-- Alignment Guidelines Legend -->
+      <div class="mt-auto pt-3 border-t border-slate-800 space-y-2.5 text-xs text-slate-400">
+        <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px]">Handwriting Match Breakdown</div>
+        <ul class="space-y-1.5 text-[11px] text-slate-400">
+          <li class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span><strong>Front V-Point:</strong> Maggie, Camila, Alexa (Point), Maria, SJ</span>
+          </li>
+          <li class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span><strong>Back Quad (Box):</strong> Hannah, Rome, Carter, Alaina</span>
+          </li>
+          <li class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span><strong>Wings & In-between:</strong> Ariella/Ella, Selah, Anneliza, Riley, Annie/Sophia</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Modal: Simple Add Dancer / Rename Dialog -->
+  <div id="modal-container" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="modal-title" class="font-bold text-base text-slate-100">Add New Dancer</h3>
+        <button id="modal-close" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Dancer Name / Label</label>
+        <input id="modal-dancer-name" type="text" placeholder="e.g. Taylor" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Role / Section Color</label>
+        <div class="grid grid-cols-4 gap-2" id="color-picker-group">
+          <!-- Radio or buttons for color -->
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="modal-cancel-btn" class="px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700">Cancel</button>
+        <button id="modal-save-btn" class="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold shadow-md shadow-pink-600/30">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Print Preview Dialog -->
+  <div id="print-preview-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900">
+        <div class="flex items-center gap-2.5">
+          <i class="ph-bold ph-printer text-pink-400 text-lg"></i>
+          <div>
+            <h3 class="font-bold text-white text-sm">Print Drill Sheet Preview</h3>
+            <p class="text-xs text-slate-400">Previewing landscape coach sheet (Black & White high contrast)</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-modal-do-print" class="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-pink-600/30 transition">
+            <i class="ph-bold ph-printer"></i> Print Now
+          </button>
+          <button id="btn-modal-close-preview" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">
+            <i class="ph-bold ph-x text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body / Paper Sheet Preview -->
+      <div class="flex-1 overflow-y-auto p-6 bg-slate-950 flex justify-center">
+        <div id="preview-paper-sheet" class="w-full max-w-3xl bg-white text-slate-900 rounded-lg p-6 shadow-2xl border border-slate-300 flex flex-col justify-between text-xs space-y-4">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*
+     * DANCER DATA AND POSITIONS
+     */
+    const INITIAL_DANCERS = [
+      // Front V-formation (Emerald / Green accent)
+      { id: '1', name: 'Maggie', x: 20, y: 80, role: 'front-v', color: '#10b981' },
+      { id: '2', name: 'Camila', x: 34, y: 72, role: 'front-v', color: '#10b981' },
+      { id: '3', name: 'Alexa', x: 50, y: 64, role: 'front-v', color: '#10b981' }, // Center Point
+      { id: '4', name: 'Maria', x: 66, y: 72, role: 'front-v', color: '#10b981' },
+      { id: '5', name: 'SJ', x: 80, y: 80, role: 'front-v', color: '#10b981' },
+
+      // Back 4 Box Formation (Cyan accent)
+      { id: '6', name: 'Hannah', x: 38, y: 18, role: 'back-box', color: '#06b6d4' },
+      { id: '7', name: 'Rome', x: 62, y: 18, role: 'back-box', color: '#06b6d4' },
+      { id: '8', name: 'Alaina', x: 38, y: 32, role: 'back-box', color: '#06b6d4' },
+      { id: '9', name: 'Carter', x: 62, y: 32, role: 'back-box', color: '#06b6d4' },
+
+      // Center bridge
+      { id: '10', name: 'Anneliza', x: 50, y: 46, role: 'center', color: '#f59e0b' },
+
+      // Left Flank
+      { id: '11', name: 'Selah', x: 18, y: 38, role: 'wing-left', color: '#ec4899' },
+      { id: '12', name: 'Ariella', x: 23, y: 52, role: 'wing-left', color: '#a855f7' },
+      { id: '13', name: 'Ella', x: 31, y: 54, role: 'wing-left', color: '#a855f7' },
+
+      // Right Flank
+      { id: '14', name: 'Riley', x: 69, y: 54, role: 'wing-right', color: '#a855f7' },
+      { id: '15', name: 'Annie/Sophia', x: 80, y: 52, role: 'wing-right', color: '#a855f7' },
+      { id: '16', name: 'Annie/Sophia (Alt)', x: 84, y: 36, role: 'wing-right', color: '#ec4899' }
+    ];
+
+    // Color choices for roles
+    const COLOR_PALETTE = [
+      { name: 'Emerald', hex: '#10b981' },
+      { name: 'Cyan', hex: '#06b6d4' },
+      { name: 'Pink', hex: '#ec4899' },
+      { name: 'Purple', hex: '#a855f7' },
+      { name: 'Amber', hex: '#f59e0b' },
+      { name: 'Blue', hex: '#3b82f6' },
+      { name: 'Red', hex: '#f43f5e' },
+      { name: 'Indigo', hex: '#6366f1' }
+    ];
+
+    // State Variables
+    let dancers = JSON.parse(JSON.stringify(INITIAL_DANCERS));
+    let selectedDancerId = null;
+    let isGridVisible = true;
+    let isSnapEnabled = true;
+    let isCourtMarksVisible = true;
+    let isDragging = false;
+    let dragTarget = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    // DOM Elements
+    const matContainer = document.getElementById('mat-container');
+    const dancerLayer = document.getElementById('dancer-layer');
+    const guideLayer = document.getElementById('guide-layer');
+    const rosterList = document.getElementById('roster-list');
+    const rosterCount = document.getElementById('roster-count');
+    const inspectorContent = document.getElementById('inspector-content');
+    const selectedBadge = document.getElementById('selected-badge');
+    const btnToggleGrid = document.getElementById('btn-toggle-grid');
+    const btnToggleSnap = document.getElementById('btn-toggle-snap');
+    const btnToggleNumbers = document.getElementById('btn-toggle-numbers');
+    const gridStatus = document.getElementById('grid-status');
+    const snapStatus = document.getElementById('snap-status');
+    const marksStatus = document.getElementById('marks-status');
+    const btnReset = document.getElementById('btn-reset');
+    const btnPrint = document.getElementById('btn-print');
+    const btnPreviewPrint = document.getElementById('btn-preview-print');
+    const btnCleanChevrons = document.getElementById('btn-clean-chevrons');
+    const btnCleanBox = document.getElementById('btn-clean-box');
+    const btnCleanWings = document.getElementById('btn-clean-wings');
+    const btnSymmetrize = document.getElementById('btn-symmetrize');
+    const btnApply4Back = document.getElementById('btn-apply-4back');
+    const btnAddDancer = document.getElementById('btn-add-dancer');
+    const modalContainer = document.getElementById('modal-container');
+    const modalClose = document.getElementById('modal-close');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalSaveBtn = document.getElementById('modal-save-btn');
+    const modalDancerName = document.getElementById('modal-dancer-name');
+    const colorPickerGroup = document.getElementById('color-picker-group');
+    const formationNameInput = document.getElementById('formation-name');
+    const printTitleDisplay = document.getElementById('print-title-display');
+    const printDate = document.getElementById('print-date');
+    const printDancerCount = document.getElementById('print-dancer-count');
+    const printRosterGrid = document.getElementById('print-roster-grid');
+
+    // Preview Modal Elements
+    const printPreviewModal = document.getElementById('print-preview-modal');
+    const btnModalClosePreview = document.getElementById('btn-modal-close-preview');
+    const btnModalDoPrint = document.getElementById('btn-modal-do-print');
+    const previewPaperSheet = document.getElementById('preview-paper-sheet');
+
+    let modalSelectedColor = COLOR_PALETTE[0].hex;
+
+    // Synchronize formation name with print header
+    formationNameInput.addEventListener('input', () => {
+      printTitleDisplay.textContent = formationNameInput.value || 'Dance Formation';
+    });
+
+    // Populate Print Ledger with exact dancer coordinates
+    function updatePrintLedger() {
+      const today = new Date().toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      printDate.textContent = today;
+      printDancerCount.textContent = dancers.length;
+      printTitleDisplay.textContent = formationNameInput.value || 'Dance Formation 1';
+
+      printRosterGrid.innerHTML = '';
+      // Sort alphabetically for quick finding on paper
+      const sorted = [...dancers].sort((a,b) => a.name.localeCompare(b.name));
+      sorted.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between border-b border-slate-200 py-0.5';
+        item.innerHTML = `
+          <span class="font-medium text-slate-900">• ${d.name}</span>
+          <span class="text-slate-600 font-mono text-[9px]">L: ${Math.round(d.x)}% | D: ${Math.round(d.y)}%</span>
+        `;
+        printRosterGrid.appendChild(item);
+      });
+    }
+
+    // Render Formation Floor Guide Lines
+    function renderGuideLines() {
+      guideLayer.innerHTML = '';
+      if (!isGridVisible) return;
+
+      const dMap = {};
+      dancers.forEach(d => { dMap[d.name.toLowerCase()] = d; });
+
+      // Draw lines for front wedge: Maggie -> Camila -> Alexa -> Maria -> SJ
+      const wedgeNames = ['maggie', 'camila', 'alexa', 'maria', 'sj'];
+      const wedgePoints = wedgeNames.map(n => dMap[n]).filter(Boolean);
+
+      if (wedgePoints.length > 1) {
+        let pathStr = `M ${wedgePoints[0].x}% ${wedgePoints[0].y}%`;
+        for (let i = 1; i < wedgePoints.length; i++) {
+          pathStr += ` L ${wedgePoints[i].x}% ${wedgePoints[i].y}%`;
+        }
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathStr);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', '#10b981');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-dasharray', '4 4');
+        path.setAttribute('stroke-opacity', '0.7');
+        guideLayer.appendChild(path);
+      }
+
+      // Draw box for back quad: Hannah -> Rome -> Carter -> Alaina -> Hannah
+      const boxNames = ['hannah', 'rome', 'carter', 'alaina'];
+      const boxPoints = boxNames.map(n => dMap[n]).filter(Boolean);
+      if (boxPoints.length === 4) {
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        const pointsStr = boxPoints.map(p => `${p.x}%,${p.y}%`).join(' ');
+        poly.setAttribute('points', pointsStr);
+        poly.setAttribute('fill', 'rgba(6, 182, 212, 0.08)');
+        poly.setAttribute('stroke', '#06b6d4');
+        poly.setAttribute('stroke-width', '1.8');
+        poly.setAttribute('stroke-dasharray', '3 3');
+        poly.setAttribute('stroke-opacity', '0.8');
+        guideLayer.appendChild(poly);
+      }
+    }
+
+    // Render all dancer nodes on the mat
+    function renderDancers() {
+      dancerLayer.innerHTML = '';
+      dancers.forEach(dancer => {
+        const isSelected = dancer.id === selectedDancerId;
+        const el = document.createElement('div');
+        el.className = `dancer-token absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group ${isSelected ? 'selected' : ''}`;
+        el.style.left = `${dancer.x}%`;
+        el.style.top = `${dancer.y}%`;
+        el.dataset.id = dancer.id;
+
+        // Visual Token Circle with dedicated classes for printing
+        el.innerHTML = `
+          <div class="token-circle relative w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm text-white shadow-lg transition-transform"
+               style="background-color: ${dancer.color}; box-shadow: 0 4px 12px ${dancer.color}40, inset 0 2px 4px rgba(255,255,255,0.3)">
+            <span class="truncate max-w-[2.2rem] text-center">${getInitials(dancer.name)}</span>
+            <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-slate-900 border-2 border-white/80 no-print"></div>
+          </div>
+          <div class="token-label mt-1 px-1.5 py-0.5 rounded bg-slate-900/90 border border-slate-700/80 text-[10px] sm:text-xs font-semibold text-slate-100 whitespace-nowrap shadow-md pointer-events-none group-hover:scale-105 transition-transform">
+            ${dancer.name}
+          </div>
+        `;
+
+        // Interaction Listeners (Touch & Mouse)
+        el.addEventListener('mousedown', (e) => startDrag(e, dancer));
+        el.addEventListener('touchstart', (e) => startDrag(e, dancer), { passive: false });
+
+        dancerLayer.appendChild(el);
+      });
+
+      renderGuideLines();
+      renderRosterList();
+      renderInspector();
+      updatePrintLedger();
+    }
+
+    function getInitials(name) {
+      if (!name) return '??';
+      const parts = name.split(/[\/\s-]+/);
+      if (parts.length > 1) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    }
+
+    function getEventPos(e) {
+      const rect = matContainer.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const xPercent = Math.max(3, Math.min(97, ((clientX - rect.left) / rect.width) * 100));
+      const yPercent = Math.max(4, Math.min(95, ((clientY - rect.top) / rect.height) * 100));
+      return { x: xPercent, y: yPercent };
+    }
+
+    function startDrag(e, dancer) {
+      e.stopPropagation();
+      if (e.touches && e.touches.length > 1) return; // ignore multi-touch
+      if (e.preventDefault) e.preventDefault();
+
+      selectDancer(dancer.id);
+      isDragging = true;
+      dragTarget = dancer;
+
+      const pos = getEventPos(e);
+      dragOffset.x = pos.x - dancer.x;
+      dragOffset.y = pos.y - dancer.y;
+
+      const tokenEl = document.querySelector(`.dancer-token[data-id="${dancer.id}"]`);
+      if (tokenEl) tokenEl.classList.add('dragging');
+
+      window.addEventListener('mousemove', onDragMove);
+      window.addEventListener('mouseup', endDrag);
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', endDrag);
+    }
+
+    function onDragMove(e) {
+      if (!isDragging || !dragTarget) return;
+      if (e.preventDefault) e.preventDefault();
+
+      const pos = getEventPos(e);
+      let newX = pos.x - dragOffset.x;
+      let newY = pos.y - dragOffset.y;
+
+      // Snapping to 2.5% increments if enabled
+      if (isSnapEnabled) {
+        newX = Math.round(newX / 2.5) * 2.5;
+        newY = Math.round(newY / 2.5) * 2.5;
+      }
+
+      // Constrain within borders
+      newX = Math.max(4, Math.min(96, newX));
+      newY = Math.max(5, Math.min(95, newY));
+
+      dragTarget.x = Number(newX.toFixed(1));
+      dragTarget.y = Number(newY.toFixed(1));
+
+      // Quick visual update without full rerender
+      const tokenEl = document.querySelector(`.dancer-token[data-id="${dragTarget.id}"]`);
+      if (tokenEl) {
+        tokenEl.style.left = `${dragTarget.x}%`;
+        tokenEl.style.top = `${dragTarget.y}%`;
+      }
+      renderGuideLines();
+      updateInspectorCoords();
+    }
+
+    function endDrag() {
+      if (isDragging && dragTarget) {
+        const tokenEl = document.querySelector(`.dancer-token[data-id="${dragTarget.id}"]`);
+        if (tokenEl) tokenEl.classList.remove('dragging');
+        renderDancers(); // Complete refresh
+      }
+      isDragging = false;
+      dragTarget = null;
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', endDrag);
+      window.removeEventListener('touchmove', onDragMove);
+      window.removeEventListener('touchend', endDrag);
+    }
+
+    function selectDancer(id) {
+      selectedDancerId = id;
+      document.querySelectorAll('.dancer-token').forEach(el => {
+        el.classList.toggle('selected', el.dataset.id === id);
+      });
+      document.querySelectorAll('.roster-item').forEach(el => {
+        el.classList.toggle('bg-slate-800', el.dataset.id === id);
+        el.classList.toggle('border-pink-500/50', el.dataset.id === id);
+      });
+      renderInspector();
+    }
+
+    function renderRosterList() {
+      rosterList.innerHTML = '';
+      rosterCount.innerText = dancers.length;
+
+      dancers.forEach(dancer => {
+        const isSelected = dancer.id === selectedDancerId;
+        const item = document.createElement('div');
+        item.dataset.id = dancer.id;
+        item.className = `roster-item flex items-center justify-between p-2 rounded-lg cursor-pointer transition text-xs border ${
+          isSelected 
+            ? 'bg-slate-800 border-pink-500 text-white font-bold' 
+            : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white'
+        }`;
+
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full flex-shrink-0" style="background-color: ${dancer.color}"></span>
+            <span class="truncate max-w-[120px]">${dancer.name}</span>
+          </div>
+          <span class="text-[10px] font-mono text-slate-400">X:${Math.round(dancer.x)} Y:${Math.round(dancer.y)}</span>
+        `;
+
+        item.addEventListener('click', () => {
+          selectDancer(dancer.id);
+        });
+
+        rosterList.appendChild(item);
+      });
+    }
+
+    function renderInspector() {
+      const dancer = dancers.find(d => d.id === selectedDancerId);
+      if (!dancer) {
+        selectedBadge.innerText = 'None';
+        selectedBadge.className = 'text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700';
+        inspectorContent.innerHTML = `
+          <div class="p-6 rounded-xl bg-slate-800/30 border border-slate-800 text-center text-xs text-slate-400 space-y-2">
+            <i class="ph-duotone ph-hand-pointing text-2xl text-pink-400 block mx-auto"></i>
+            <p>Select any dancer on the floor to adjust positioning, name, and styling.</p>
+          </div>
+        `;
+        return;
+      }
+
+      selectedBadge.innerText = dancer.name;
+      selectedBadge.className = 'text-[11px] px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/40 font-bold';
+
+      inspectorContent.innerHTML = `
+        <div class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Dancer Name</label>
+            <div class="flex gap-1.5">
+              <input id="insp-name" type="text" value="${dancer.name}" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-medium focus:outline-none focus:border-pink-500" />
+              <button id="insp-update-name" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white rounded-lg text-xs font-bold transition">Save</button>
+            </div>
+          </div>
+
+          <!-- Exact Coordinate Sliders -->
+          <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-400">Left / Right (X):</span>
+              <span id="insp-x-val" class="font-mono text-pink-400 font-bold">${dancer.x}%</span>
+            </div>
+            <input id="insp-x-slider" type="range" min="4" max="96" step="0.5" value="${dancer.x}" class="w-full accent-pink-500 cursor-pointer" />
+
+            <div class="flex justify-between items-center text-xs pt-1">
+              <span class="text-slate-400">Upstage / Front (Y):</span>
+              <span id="insp-y-val" class="font-mono text-pink-400 font-bold">${dancer.y}%</span>
+            </div>
+            <input id="insp-y-slider" type="range" min="5" max="95" step="0.5" value="${dancer.y}" class="w-full accent-pink-500 cursor-pointer" />
+          </div>
+
+          <!-- Color Role Picker -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Color Tag</label>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              ${COLOR_PALETTE.map(c => `
+                <button class="color-select-btn w-6 h-6 rounded-full border-2 transition ${c.hex === dancer.color ? 'border-white scale-110' : 'border-transparent'}"
+                        style="background-color: ${c.hex}" data-hex="${c.hex}" title="${c.name}"></button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Nudge Navigation Buttons -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fine Nudge (1 Step)</label>
+            <div class="grid grid-cols-3 gap-1 w-28 mx-auto">
+              <div></div>
+              <button id="nudge-up" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-200 flex items-center justify-center"><i class="ph-bold ph-caret-up"></i></button>
+              <div></div>
+              <button id="nudge-left" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-200 flex items-center justify-center"><i class="ph-bold ph-caret-left"></i></button>
+              <button id="nudge-down" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-200 flex items-center justify-center"><i class="ph-bold ph-caret-down"></i></button>
+              <button id="nudge-right" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-200 flex items-center justify-center"><i class="ph-bold ph-caret-right"></i></button>
+            </div>
+          </div>
+
+          <!-- Remove Dancer Button -->
+          <div class="pt-2 border-t border-slate-800">
+            <button id="btn-delete-dancer" class="w-full py-1.5 px-3 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <i class="ph-bold ph-trash"></i> Remove from Floor
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Inspector listeners
+      document.getElementById('insp-update-name').addEventListener('click', () => {
+        const val = document.getElementById('insp-name').value.trim();
+        if (val) {
+          dancer.name = val;
+          renderDancers();
+        }
+      });
+
+      const xSlider = document.getElementById('insp-x-slider');
+      xSlider.addEventListener('input', (e) => {
+        dancer.x = parseFloat(e.target.value);
+        updateInspectorCoords();
+        renderDancersFast();
+      });
+
+      const ySlider = document.getElementById('insp-y-slider');
+      ySlider.addEventListener('input', (e) => {
+        dancer.y = parseFloat(e.target.value);
+        updateInspectorCoords();
+        renderDancersFast();
+      });
+
+      document.querySelectorAll('.color-select-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dancer.color = btn.dataset.hex;
+          renderDancers();
+        });
+      });
+
+      // Nudge buttons
+      const nudge = (dx, dy) => {
+        dancer.x = Math.max(4, Math.min(96, Number((dancer.x + dx).toFixed(1))));
+        dancer.y = Math.max(5, Math.min(95, Number((dancer.y + dy).toFixed(1))));
+        renderDancers();
+      };
+      document.getElementById('nudge-up').addEventListener('click', () => nudge(0, -1));
+      document.getElementById('nudge-down').addEventListener('click', () => nudge(0, 1));
+      document.getElementById('nudge-left').addEventListener('click', () => nudge(-1, 0));
+      document.getElementById('nudge-right').addEventListener('click', () => nudge(1, 0));
+
+      document.getElementById('btn-delete-dancer').addEventListener('click', () => {
+        dancers = dancers.filter(d => d.id !== dancer.id);
+        selectedDancerId = null;
+        renderDancers();
+      });
+    }
+
+    function updateInspectorCoords() {
+      const dancer = dancers.find(d => d.id === selectedDancerId);
+      if (!dancer) return;
+      const xVal = document.getElementById('insp-x-val');
+      const yVal = document.getElementById('insp-y-val');
+      if (xVal) xVal.innerText = `${dancer.x}%`;
+      if (yVal) yVal.innerText = `${dancer.y}%`;
+    }
+
+    function renderDancersFast() {
+      const dancer = dancers.find(d => d.id === selectedDancerId);
+      if (!dancer) return;
+      const el = document.querySelector(`.dancer-token[data-id="${dancer.id}"]`);
+      if (el) {
+        el.style.left = `${dancer.x}%`;
+        el.style.top = `${dancer.y}%`;
+      }
+      renderGuideLines();
+    }
+
+    // Clean Front Chevron (Maggie, Camila, Alexa, Maria, SJ)
+    function autoCleanChevron() {
+      const targetNames = {
+        'maggie': { x: 20, y: 80 },
+        'camila': { x: 35, y: 72 },
+        'alexa':  { x: 50, y: 64 }, // Exact center point
+        'maria':  { x: 65, y: 72 },
+        'sj':     { x: 80, y: 80 }
+      };
+
+      dancers.forEach(d => {
+        const key = d.name.toLowerCase();
+        if (targetNames[key]) {
+          d.x = targetNames[key].x;
+          d.y = targetNames[key].y;
+          d.color = '#10b981';
+        }
+      });
+      renderDancers();
+    }
+
+    // Clean Back Box Quad (Hannah, Rome, Carter, Alaina)
+    function autoCleanBox() {
+      const boxTargets = {
+        'hannah': { x: 38, y: 18 },
+        'rome':   { x: 62, y: 18 },
+        'alaina': { x: 38, y: 32 },
+        'carter': { x: 62, y: 32 }
+      };
+
+      dancers.forEach(d => {
+        const key = d.name.toLowerCase();
+        if (boxTargets[key]) {
+          d.x = boxTargets[key].x;
+          d.y = boxTargets[key].y;
+          d.color = '#06b6d4';
+        }
+      });
+      renderDancers();
+    }
+
+    // Clean Wing Flanks (Selah, Ariella, Ella, Riley, Annie/Sophia)
+    function autoCleanWings() {
+      const wingTargets = {
+        'selah':        { x: 16, y: 38 },
+        'ariella':      { x: 24, y: 52 },
+        'ella':         { x: 32, y: 52 },
+        'anneliza':     { x: 50, y: 46 }, // center bridge
+        'riley':        { x: 68, y: 52 },
+        'annie/sophia': { x: 76, y: 52 }
+      };
+
+      dancers.forEach(d => {
+        const key = d.name.toLowerCase();
+        if (wingTargets[key]) {
+          d.x = wingTargets[key].x;
+          d.y = wingTargets[key].y;
+        }
+      });
+      renderDancers();
+    }
+
+    // Mirror Symmetry
+    function mirrorSymmetry() {
+      const pairs = [
+        ['maggie', 'sj'],
+        ['camila', 'maria'],
+        ['hannah', 'rome'],
+        ['alaina', 'carter'],
+        ['ariella', 'riley']
+      ];
+
+      pairs.forEach(([leftName, rightName]) => {
+        const left = dancers.find(d => d.name.toLowerCase() === leftName);
+        const right = dancers.find(d => d.name.toLowerCase() === rightName);
+        if (left && right) {
+          const distFromCenter = Math.abs(50 - left.x);
+          right.x = Number((50 + distFromCenter).toFixed(1));
+          right.y = left.y;
+        }
+      });
+
+      ['alexa', 'anneliza'].forEach(name => {
+        const d = dancers.find(item => item.name.toLowerCase() === name);
+        if (d) d.x = 50;
+      });
+
+      renderDancers();
+    }
+
+    // Action: Shift Back 4 Forward
+    function apply4BackForward() {
+      const backQuadNames = ['hannah', 'rome', 'alaina', 'carter'];
+      backQuadNames.forEach(name => {
+        const dancer = dancers.find(d => d.name.toLowerCase() === name);
+        if (dancer) {
+          dancer.y = Math.min(90, dancer.y + 8);
+        }
+      });
+      renderDancers();
+    }
+
+    // Keyboard Nudge Support
+    window.addEventListener('keydown', (e) => {
+      if (!selectedDancerId) return;
+      if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) return;
+
+      const dancer = dancers.find(d => d.id === selectedDancerId);
+      if (!dancer) return;
+
+      let dx = 0;
+      let dy = 0;
+      const step = e.shiftKey ? 2.5 : 0.5;
+
+      switch(e.key) {
+        case 'ArrowUp': dy = -step; break;
+        case 'ArrowDown': dy = step; break;
+        case 'ArrowLeft': dx = -step; break;
+        case 'ArrowRight': dx = step; break;
+        default: return;
+      }
+
+      e.preventDefault();
+      dancer.x = Math.max(4, Math.min(96, Number((dancer.x + dx).toFixed(1))));
+      dancer.y = Math.max(5, Math.min(95, Number((dancer.y + dy).toFixed(1))));
+      renderDancersFast();
+      updateInspectorCoords();
+    });
+
+    // Deselect when clicking floor background
+    matContainer.addEventListener('click', (e) => {
+      if (e.target === matContainer || e.target.id === 'mat-grid-lines' || e.target.id === 'dancer-layer') {
+        selectedDancerId = null;
+        document.querySelectorAll('.dancer-token').forEach(el => el.classList.remove('selected'));
+        renderInspector();
+      }
+    });
+
+    // Toggle Grid
+    btnToggleGrid.addEventListener('click', () => {
+      isGridVisible = !isGridVisible;
+      gridStatus.innerText = isGridVisible ? 'On' : 'Off';
+      gridStatus.className = isGridVisible ? 'text-emerald-400' : 'text-slate-400';
+      matContainer.classList.toggle('mat-stripes', isGridVisible);
+      document.getElementById('guide-layer').style.display = isGridVisible ? 'block' : 'none';
+    });
+
+    // Toggle Snap
+    btnToggleSnap.addEventListener('click', () => {
+      isSnapEnabled = !isSnapEnabled;
+      snapStatus.innerText = isSnapEnabled ? 'On' : 'Off';
+      snapStatus.className = isSnapEnabled ? 'text-emerald-400' : 'text-slate-400';
+    });
+
+    // Toggle Court Marks
+    btnToggleNumbers.addEventListener('click', () => {
+      isCourtMarksVisible = !isCourtMarksVisible;
+      marksStatus.innerText = isCourtMarksVisible ? 'On' : 'Off';
+      marksStatus.className = isCourtMarksVisible ? 'text-emerald-400' : 'text-slate-400';
+      document.getElementById('court-numbers').style.display = isCourtMarksVisible ? 'flex' : 'none';
+    });
+
+    // Reset Original
+    btnReset.addEventListener('click', () => {
+      dancers = JSON.parse(JSON.stringify(INITIAL_DANCERS));
+      selectedDancerId = null;
+      renderDancers();
+    });
+
+    // Clean Presets
+    btnCleanChevrons.addEventListener('click', autoCleanChevron);
+    btnCleanBox.addEventListener('click', autoCleanBox);
+    btnCleanWings.addEventListener('click', autoCleanWings);
+    btnSymmetrize.addEventListener('click', mirrorSymmetry);
+    btnApply4Back.addEventListener('click', apply4BackForward);
+
+    // Print Preview Modal Generator
+    btnPreviewPrint.addEventListener('click', () => {
+      updatePrintLedger();
+      const today = new Date().toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      const title = formationNameInput.value || 'Dance Formation 1';
+      
+      previewPaperSheet.innerHTML = `
+        <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-center">
+          <div>
+            <div class="text-xl font-black uppercase text-slate-900 tracking-wide">${title}</div>
+            <div class="text-xs text-slate-600">Official Drill Chart • Coaches' Binder Printout</div>
+          </div>
+          <div class="text-right text-xs text-slate-600">
+            <div><strong>Date:</strong> ${today}</div>
+            <div><strong>Total Dancers:</strong> ${dancers.length}</div>
+          </div>
+        </div>
+
+        <div class="text-center font-bold text-xs uppercase tracking-widest text-slate-500 py-0.5">
+          ▲ Upstage (Back of Floor) ▲
+        </div>
+
+        <!-- Mini Mat Canvas Preview -->
+        <div class="relative w-full h-[290px] border-2 border-slate-900 rounded bg-white overflow-hidden" 
+             style="background-image: linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px); background-size: 32px 32px;">
+          <!-- 7 mat panels -->
+          <div class="absolute inset-0 grid grid-cols-7 divide-x divide-slate-300 pointer-events-none">
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+          </div>
+          <!-- Center vertical line -->
+          <div class="absolute top-0 bottom-0 left-1/2 w-0.5 -translate-x-1/2 bg-rose-600"></div>
+          <!-- Center horiz line -->
+          <div class="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-blue-600"></div>
+          <!-- Center target -->
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-900"></div>
+          </div>
+          
+          <!-- Mini Tokens -->
+          ${dancers.map(d => `
+            <div class="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none" style="left: ${d.x}%; top: ${d.y}%;">
+              <div class="w-7 h-7 rounded-full border border-slate-900 font-bold text-[10px] text-white flex items-center justify-center shadow-sm" style="background-color: ${d.color};">
+                ${getInitials(d.name)}
+              </div>
+              <div class="mt-0.5 px-1 rounded bg-white border border-slate-800 text-[9px] font-bold text-slate-900 whitespace-nowrap">
+                ${d.name}
+              </div>
+            </div>
+          `).join('')}
+
+          <!-- Downstage banner -->
+          <div class="absolute bottom-0 inset-x-0 bg-slate-100 border-t border-slate-800 py-1 text-center font-black text-[10px] uppercase text-slate-800 tracking-wider">
+            ▼ FRONT / AUDIENCE & JUDGES ▼
+          </div>
+        </div>
+
+        <!-- Ledger table -->
+        <div class="grid grid-cols-2 gap-4 border-t-2 border-slate-900 pt-3">
+          <div>
+            <div class="font-bold uppercase tracking-wider text-slate-900 text-[11px] mb-1">Roster & Coordinates</div>
+            <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px]">
+              ${[...dancers].sort((a,b)=>a.name.localeCompare(b.name)).map(d => `
+                <div class="flex justify-between border-b border-slate-200 py-0.5">
+                  <span class="font-semibold text-slate-900 truncate mr-1">• ${d.name}</span>
+                  <span class="font-mono text-slate-600 text-[9px] whitespace-nowrap">${Math.round(d.x)}%, ${Math.round(d.y)}%</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="border-l border-slate-300 pl-4 space-y-1.5">
+            <div class="font-bold uppercase tracking-wider text-slate-900 text-[11px] mb-1">Choreographer Cues</div>
+            <div class="p-2.5 rounded bg-slate-100 border border-slate-300 text-[10px] space-y-1.5 text-slate-700">
+              <div><strong>Note from Sheet:</strong> "4 back move forward" (Hannah, Rome, Carter, Alaina shift downstage).</div>
+              <div><strong>Front Point Dancer:</strong> Alexa (X: 50%, Y: 64%).</div>
+              <div><strong>Wing Spacing:</strong> Selah, Ariella, Ella on Stage Left; Riley, Annie/Sophia on Stage Right.</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      printPreviewModal.classList.remove('hidden');
+    });
+
+    btnModalClosePreview.addEventListener('click', () => {
+      printPreviewModal.classList.add('hidden');
+    });
+
+    btnModalDoPrint.addEventListener('click', () => {
+      printPreviewModal.classList.add('hidden');
+      updatePrintLedger();
+      window.print();
+    });
+
+    // Print / PDF Direct Button
+    btnPrint.addEventListener('click', () => {
+      updatePrintLedger();
+      window.print();
+    });
+
+    // Add Dancer Modal Logic
+    function openAddModal() {
+      modalDancerName.value = '';
+      modalSelectedColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)].hex;
+      
+      colorPickerGroup.innerHTML = COLOR_PALETTE.map(c => `
+        <button type="button" class="modal-color-choice h-8 rounded-lg border-2 flex items-center justify-center transition ${c.hex === modalSelectedColor ? 'border-white scale-105' : 'border-transparent'}"
+                style="background-color: ${c.hex}" data-hex="${c.hex}">
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.modal-color-choice').forEach(b => {
+        b.addEventListener('click', () => {
+          modalSelectedColor = b.dataset.hex;
+          document.querySelectorAll('.modal-color-choice').forEach(el => {
+            el.classList.toggle('border-white', el.dataset.hex === modalSelectedColor);
+            el.classList.toggle('scale-105', el.dataset.hex === modalSelectedColor);
+          });
+        });
+      });
+
+      modalContainer.classList.remove('hidden');
+      modalDancerName.focus();
+    }
+
+    function closeAddModal() {
+      modalContainer.classList.add('hidden');
+    }
+
+    btnAddDancer.addEventListener('click', openAddModal);
+    modalClose.addEventListener('click', closeAddModal);
+    modalCancelBtn.addEventListener('click', closeAddModal);
+
+    modalSaveBtn.addEventListener('click', () => {
+      const name = modalDancerName.value.trim() || `Dancer ${dancers.length + 1}`;
+      const newDancer = {
+        id: String(Date.now()),
+        name: name,
+        x: 50,
+        y: 50,
+        role: 'custom',
+        color: modalSelectedColor
+      };
+      dancers.push(newDancer);
+      closeAddModal();
+      renderDancers();
+      selectDancer(newDancer.id);
+    });
+
+    window.onload = function() {
+      renderDancers();
+      updatePrintLedger();
+    };
+  </script>
+</body>
+</html>
